@@ -22,6 +22,7 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
 }
+
 dotenv.config();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -41,19 +42,18 @@ app.use(userRoute);
 // JWT-based authentication middleware
 app.use((req, res, next) => {
     // Get the token from the request header
-    const response=req.header('Authorization');
-    if(response===undefined){
-        return res.status(401).json({error:"Please add the token in authorisation"})
-    }
-    const token = req.header('Authorization').replace('Bearer ', '');
-
-    
+    try{
+      const token = req.header('Authorization').replace('Bearer ', '');
     // Verify the token
     jwt.verify(token,process.env.JWT_SECRET, (err, payload) => {
       if (err) return res.status(401).send({ error: 'Unauthorized' });
       req.user = payload;
       next();
     });
+    }catch(err){
+      return res.status(401).send({ error: 'Please Enter authorisation token ' });
+    }
+    
   });
 
 // Rate limiting middleware
@@ -67,7 +67,7 @@ app.use(limiter);
 app.use(quizRoute);
 
 
-cron.schedule(' */5 * * * *', async() => {
+cron.schedule(' */5 * * * *', async(req,res) => {
     const now = new Date();
     const quizzes=await Quiz.find();
     try{
@@ -81,8 +81,9 @@ cron.schedule(' */5 * * * *', async() => {
            
             quiz.save();
           });
-          
+          res.status(200).json("Quiz status updated");
     }catch(err){
+      res.status(401).json("something went wrong")
         console.log(err);
     }
 

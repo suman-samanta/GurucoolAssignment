@@ -3,6 +3,10 @@ const Quiz=require("../models/Quiz")
 
 exports.createNewQuiz=async (req, res) => {
 
+  const response=req.header('Authorization');
+  if(response===undefined){
+      return res.status(401).json({error:"Please add the token in authorisation"})
+  }
     const {question,options,rightAnswer,startDate,endDate}=req.body;
     const newStartDate=new Date(startDate);
     const newEndDate=new Date(endDate);
@@ -22,6 +26,11 @@ exports.createNewQuiz=async (req, res) => {
 };
 
 exports.getActiveQuizes= async (req, res) => {
+
+  const response=req.header('Authorization');
+  if(response===undefined){
+      return res.status(401).json({error:"Please add the token in authorisation"})
+  }
     try{
         const quiz = await Quiz.find({status:'active'});
         res.status(200).json(quiz);
@@ -31,6 +40,10 @@ exports.getActiveQuizes= async (req, res) => {
   }
 
 exports.getResultOfAQuiz=async (req, res) => {
+  const response=req.header('Authorization');
+  if(response===undefined){
+      return res.status(401).json({error:"Please add the token in authorisation"})
+  }
     try{
         const quiz = await Quiz.findById(req.params.id);
         if (new Date() - quiz.endDate >= 5 * 60 * 1000) { // 5 minutes after the quiz's end time
@@ -44,6 +57,10 @@ exports.getResultOfAQuiz=async (req, res) => {
   }
 
 exports.getAllQuizes=async (req, res) => {
+  const response=req.header('Authorization');
+  if(response===undefined){
+      return res.status(401).json({error:"Please add the token in authorisation"})
+  }
     try{   
         const quizzes = await Quiz.find();
         res.status(200).json(quizzes);
