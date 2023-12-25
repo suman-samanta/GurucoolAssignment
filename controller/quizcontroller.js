@@ -1,6 +1,8 @@
 const Quiz=require("../models/Quiz")
 
+
 exports.createNewQuiz=async (req, res) => {
+
     const {question,options,rightAnswer,startDate,endDate}=req.body;
     const newStartDate=new Date(startDate);
     const newEndDate=new Date(endDate);
@@ -13,7 +15,7 @@ exports.createNewQuiz=async (req, res) => {
         endDate:newEndDate
     });
   await quiz.save();
-  res.send(quiz);
+  res.status(200).json(quiz);
   }catch(err){
     res.status(500).json(err);
   }
@@ -21,8 +23,7 @@ exports.createNewQuiz=async (req, res) => {
 
 exports.getActiveQuizes= async (req, res) => {
     try{
-        const now = new Date();
-        const quiz = await Quiz.find({ startDate: { $lte: now }, endDate: { $gte: now } });
+        const quiz = await Quiz.find({status:'active'});
         res.status(200).json(quiz);
     }catch(err){
         res.status(500).json(err);
